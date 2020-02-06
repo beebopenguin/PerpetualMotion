@@ -28,10 +28,21 @@ from kivy.core.window import Window
 from pidev.kivy import DPEAButton
 from pidev.kivy import PauseScreen
 from time import sleep
-import RPi.GPIO as GPIO 
+import RPi.GPIO as GPIO
+import spidev
 from pidev.stepper import stepper
 from pidev.Cyprus_Commands import Cyprus_Commands_RPi as cyprus
+import Slush
 
+spi = spidev.SpiDev()
+s0 = stepper(port=0, micro_steps=32, hold_current=20, run_current=20, accel_current=20, deaccel_current=20,
+             steps_per_unit=200, speed=3)
+
+#setup the Slushengine
+b = Slush.sBoard()
+axis1 = Slush.Motor(0)
+axis1.resetDev()
+axis1.setCurrent(20, 20, 20, 20)
 
 # ////////////////////////////////////////////////////////////////
 # //                      GLOBAL VARIABLES                      //
@@ -74,7 +85,7 @@ ramp = stepper(port = 0, speed = INIT_RAMP_SPEED)
 # //                       MAIN FUNCTIONS                       //
 # //             SHOULD INTERACT DIRECTLY WITH HARDWARE         //
 # ////////////////////////////////////////////////////////////////
-	
+
 # ////////////////////////////////////////////////////////////////
 # //        DEFINE MAINSCREEN CLASS THAT KIVY RECOGNIZES        //
 # //                                                            //
@@ -94,13 +105,43 @@ class MainScreen(Screen):
         super(MainScreen, self).__init__(**kwargs)
         self.initialize()
 
+    global pos
+    pos = 0
+
     def toggleGate(self):
+        global pos
+        if pos == 0:
+            pos = 0.5
+            cyprus.set_servo_position(2, pos)
+        else:
+            pos = 0
+            cyprus.set_servo_position(2, pos)
         print("Open and Close gate here")
 
-    def toggleStaircase(self):
-        print("Turn on and off staircase here")
-        
+
     def toggleRamp(self):
+        s0.set_speed(3)
+
+        if s0.read_switch() == 1:
+            print("hi")
+            s0.go_to_position(56)
+        elif s0.get_position_in_units() == 56.0:
+            axis1.goTo(0)
+            print("bye")
+
+        else:
+            while(axis1.isBusy()):
+                continue
+            axis1.goUntilPress(0, 0, 5000) #spins until hits a NO limit at speed 1000 and direction 1
+
+
+            while(axis1.isBusy()):
+                continue
+            axis1.setAsHome()	#set the position for 0 for all go to commands
+
+            s0.set_speed(3)
+
+
         print("Move ramp up and down here")
         
     def auto(self):
@@ -108,8 +149,9 @@ class MainScreen(Screen):
         
     def setRampSpeed(self, speed):
         print("Set the ramp speed and update slider text")
-        
+
     def setStaircaseSpeed(self, speed):
+        cyprus.set_motor_speed(1, speed)
         print("Set the staircase speed and update slider text")
         
     def initialize(self):
