@@ -79,7 +79,7 @@
         Slider:
             id: rampSpeed
             orientation: 'horizontal'
-            min: 0
+            min: 1
             max: 4
             value: root.rampSpeed
             step: 0.025
@@ -117,7 +117,7 @@
 
         Label:
             id: rampSpeedLabel
-            text: 'Ramp Speed: ' + str(root.rampSpeed)
+            text: 'Ramp Speed: ' + str(rampSpeed.value)
             font_size: 40
             center_x: root.width * 0.22
             y: root.height * 0.15

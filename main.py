@@ -120,12 +120,11 @@ class MainScreen(Screen):
 
 
     def toggleRamp(self):
-        s0.set_speed(3)
 
         if s0.read_switch() == 1:
             print("hi")
-            s0.go_to_position(56)
-        elif s0.get_position_in_units() == 56.0:
+            s0.go_to_position(56.5)
+        elif s0.get_position_in_units() == 56.5:
             axis1.goTo(0)
             print("bye")
 
@@ -148,11 +147,15 @@ class MainScreen(Screen):
         print("Run through one cycle of the perpetual motion machine")
         
     def setRampSpeed(self, speed):
+        s0.set_speed(speed)
         print("Set the ramp speed and update slider text")
 
     def setStaircaseSpeed(self, speed):
         cyprus.set_motor_speed(1, speed)
         print("Set the staircase speed and update slider text")
+
+    def toggleStaircase(self):
+        cyprus.set_motor_speed(1, 0)
         
     def initialize(self):
         print("Close gate, stop staircase and home ramp here")
