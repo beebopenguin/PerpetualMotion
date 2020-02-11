@@ -145,17 +145,30 @@ class MainScreen(Screen):
         
     def auto(self):
         print("Run through one cycle of the perpetual motion machine")
+        cyprus.set_servo_position(2, 0.5)
+        self.toggleRamp()
+        while 1:
+            if cyprus.read_gpio() == 6:
+                self.setRampSpeed(self.staircaseSpeed.value)
         
     def setRampSpeed(self, speed):
         s0.set_speed(speed)
         print("Set the ramp speed and update slider text")
 
     def setStaircaseSpeed(self, speed):
-        cyprus.set_motor_speed(1, speed)
+        if self.staircase.text == "Staircase Off":
+            cyprus.set_motor_speed(1, speed)
+        else:
+            pass
         print("Set the staircase speed and update slider text")
 
     def toggleStaircase(self):
-        cyprus.set_motor_speed(1, 0)
+        if self.staircase.text == "Staircase Off":
+            cyprus.set_motor_speed(1, 0)
+            self.staircase.text = "Staircase On"
+        else:
+            self.staircase.text = "Staircase Off"
+            self.setStaircaseSpeed(self.staircaseSpeed.value)
         
     def initialize(self):
         print("Close gate, stop staircase and home ramp here")
