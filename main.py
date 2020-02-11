@@ -121,6 +121,8 @@ class MainScreen(Screen):
 
     def toggleRamp(self):
 
+        s0.set_speed(self.rampSpeed.value)
+
         if s0.read_switch() == 1:
             print("hi")
             s0.go_to_position(56.5)
@@ -138,7 +140,6 @@ class MainScreen(Screen):
                 continue
             axis1.setAsHome()	#set the position for 0 for all go to commands
 
-            s0.set_speed(3)
 
 
         print("Move ramp up and down here")
@@ -146,11 +147,20 @@ class MainScreen(Screen):
     def auto(self):
         print("Run through one cycle of the perpetual motion machine")
         cyprus.set_servo_position(2, 0.5)
+        sleep(2)
+        cyprus.set_servo_position(2, 0)
         self.toggleRamp()
         while 1:
             if cyprus.read_gpio() == 6:
-                self.setRampSpeed(self.staircaseSpeed.value)
-        
+                cyprus.set_motor_speed(1, self.staircaseSpeed.value)
+                self.toggleRamp()
+
+                while 1:
+
+                    if s0.read_switch() == True:
+                        cyprus.set_motor_speed(1, 0)
+                        s0.free_all()
+
     def setRampSpeed(self, speed):
         s0.set_speed(speed)
         print("Set the ramp speed and update slider text")
