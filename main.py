@@ -146,20 +146,31 @@ class MainScreen(Screen):
         
     def auto(self):
         print("Run through one cycle of the perpetual motion machine")
-        cyprus.set_servo_position(2, 0.5)
-        sleep(2)
-        cyprus.set_servo_position(2, 0)
-        self.toggleRamp()
-        while 1:
-            if cyprus.read_gpio() == 6:
-                cyprus.set_motor_speed(1, self.staircaseSpeed.value)
-                self.toggleRamp()
+        if axis1.isBusy():
+            s0.softStop()
+        if s0.get_position_in_units() == 56.5:
+            s0.goHome()
+        elif s0.get_position_in_units() != 0.0:
+            axis1.goUntilPress(0, 0, 5000)
+        elif s0.get_position_in_units() == 0.0:
+            cyprus.set_servo_position(2, 0.5)
+            sleep(2)
+            cyprus.set_servo_position(2, 0)
+            self.toggleRamp()
+            while 1:
+                if cyprus.read_gpio() == 6:
+                    print("metal detector signal read")
+                    cyprus.set_motor_speed(1, self.staircaseSpeed.value)
+                    self.toggleRamp()
 
-                while 1:
+                    while 1:
 
-                    if s0.read_switch() == True:
-                        cyprus.set_motor_speed(1, 0)
-                        s0.free_all()
+                        if s0.read_switch() == True:
+                            sleep(5/self.staircaseSpeed.value)
+                            cyprus.set_motor_speed(1, 0)
+                            s0.free_all()
+                            return
+        return
 
     def setRampSpeed(self, speed):
         s0.set_speed(speed)
@@ -182,6 +193,18 @@ class MainScreen(Screen):
         
     def initialize(self):
         print("Close gate, stop staircase and home ramp here")
+        cyprus.set_servo_position(2, 0)
+        cyprus.set_motor_speed(1, 0)
+        if (axis1.isBusy()):
+            s0.softStop()
+            print("s0 motor stopped")
+        if s0.get_position_in_units != 0.0:
+            axis1.goUntilPress(0, 0, 5000) #spins until hits a NO limit at speed 1000 and direction
+            axis1.setAsHome()
+        else:
+            pass
+
+        print("initialized.")
 
     def resetColors(self):
         self.ids.gate.color = YELLOW

@@ -4,6 +4,8 @@
     staircaseSpeed: staircaseSpeed
     rampSpeed: rampSpeed
 
+    on_enter: root.initialize()
+
     FloatLayout:
         size_hint: None, None
 
@@ -94,7 +96,7 @@
         Slider:
             id: staircaseSpeed
             orientation: 'horizontal'
-            min: 0
+            min: 0.3
             max: 1
             #value: root.staircaseSpeed
             step: 0.01
